@@ -1,24 +1,22 @@
 # -------- BUILD STAGE --------
-FROM eclipse-temurin:25-jdk AS build
+FROM maven:3.9.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Copy project files
+# Copy pom first (for caching)
 COPY pom.xml .
 
-RUN chmod +x mvnw
-
 # Download dependencies
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src src
 
 # Build jar
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # -------- RUN STAGE --------
-FROM eclipse-temurin:25-jdk
+FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 

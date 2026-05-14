@@ -24,10 +24,13 @@ public class AppConfig {
     @Bean
     public HandlerMapping webSocketMapping(DeviceSessionManager manager, AuthTokenValidator validator, StringRedisTemplate redis) {
         Map<String, WebSocketHandler> map = Map.of(
-                "/ws", new DeviceWebSocketHandler(manager,validator,redis)
+                "/ws/**", new DeviceWebSocketHandler(manager,validator,redis)
         );
 
-        return new SimpleUrlHandlerMapping(map, -1);
+        SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+        mapping.setUrlMap(map);
+        mapping.setOrder(-1);
+        return mapping;
     }
 
     @Bean

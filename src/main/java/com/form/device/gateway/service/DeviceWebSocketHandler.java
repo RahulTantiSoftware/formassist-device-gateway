@@ -17,6 +17,7 @@ public record DeviceWebSocketHandler(
 ) implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
+        System.out.println("🔥 HANDLER HIT");
         MultiValueMap<String, String> queryParams =UriComponentsBuilder
                 .fromUri(session.getHandshakeInfo().getUri())
                 .build()

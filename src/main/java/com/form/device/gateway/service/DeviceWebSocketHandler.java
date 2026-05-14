@@ -3,7 +3,9 @@ import com.form.device.gateway.dto.DeviceConnection;
 import com.form.device.gateway.security.AuthTokenValidator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.socket.*;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 public record DeviceWebSocketHandler(
@@ -13,12 +15,16 @@ public record DeviceWebSocketHandler(
 ) implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        String authHeader = session.getHandshakeInfo().getHeaders().getFirst("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        MultiValueMap<String, String> queryParams =UriComponentsBuilder
+                .fromUri(session.getHandshakeInfo().getUri())
+                .build()
+                .getQueryParams();
+        String token = queryParams.getFirst("token");
+
+        if (token == null || token.isEmpty()) {
             return session.close();
         }
 
-        String token = authHeader.substring(7).trim();
         DeviceConnection connection = new DeviceConnection(session);
         String deviceCode;
         try {

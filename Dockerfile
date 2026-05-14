@@ -7,7 +7,6 @@ WORKDIR /app
 COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
-COPY libs libs
 
 RUN chmod +x mvnw
 

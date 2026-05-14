@@ -1,0 +1,28 @@
+server:
+  port: 8098
+spring:
+  kafka:
+    bootstrap-servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
+
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: >
+        org.apache.kafka.common.security.plain.PlainLoginModule required
+        username='RY7CYQFI5Q3KD5LV'
+        password='cfltb2p5E5BhvOSfwnwe1ul2kVqaQC9DwMhTqtRhRbpNLmKZmEwhtaX73ALYyhkA';
+
+    producer:
+      acks: all
+      retries: 5
+      batch-size: 16384
+      buffer-memory: 33554432
+      linger-ms: 5
+      enable-idempotence: true
+      compression-type: snappy
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000

@@ -5,8 +5,6 @@ WORKDIR /app
 
 # Copy project files
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
 
 RUN chmod +x mvnw
 

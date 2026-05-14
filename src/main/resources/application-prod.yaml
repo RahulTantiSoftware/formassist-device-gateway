@@ -11,6 +11,10 @@ spring:
         org.apache.kafka.common.security.plain.PlainLoginModule required
         username='${KAFKA_API_KEY}'
         password='${KAFKA_API_SECRET}';
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+      timeout: 60000
 
 auth-service:
   url: ${AUTH_SERVICE_URL:http://localhost:8080}

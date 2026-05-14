@@ -44,8 +44,6 @@ public record DeviceWebSocketHandler(
                 return session.close();
             }
 
-            sessionManager.remove(deviceCode);
-
             sessionManager.register(deviceCode, connection);
 
         } catch (Exception e) {

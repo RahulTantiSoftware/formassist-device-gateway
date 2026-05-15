@@ -18,13 +18,18 @@ public record DeviceWebSocketHandler(
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         System.out.println("🔥 HANDLER HIT");
-        MultiValueMap<String, String> queryParams =UriComponentsBuilder
-                .fromUri(session.getHandshakeInfo().getUri())
-                .build()
-                .getQueryParams();
-        String token = queryParams.getFirst("token");
+        String protocol = session.getHandshakeInfo()
+                .getHeaders()
+                .getFirst("Sec-WebSocket-Protocol");
+
+        if (protocol == null || !protocol.startsWith("Bearer ")) {
+            return session.close();
+        }
+
+        String token = protocol.substring(7);
+
         System.out.println("connection started .............");
-        if (token == null || token.isEmpty()) {
+        if (token.isEmpty()) {
             System.out.println("token param is null");
             return session.close();
         }

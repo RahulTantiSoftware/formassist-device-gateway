@@ -39,23 +39,31 @@ public record DeviceWebSocketHandler(
             deviceCode                = claims.getStringClaim("key");
             String redisValue         = redis.opsForValue().get("token_version:" + userId);
 
-            if (redisValue == null) {
-                System.out.println("tokenVersion null");
+            if (redisValue == null || deviceCode==null) {
+                System.out.println("device code can't be null");
                 return session.close();
             }
 
             int tokenVersionFromDb = Integer.parseInt(redisValue);
 
             if (tokenVersionFromToken != tokenVersionFromDb) {
-                System.out.println("tokenVersion mismatch");
-                return session.close();
+                return session.close(CloseStatus.POLICY_VIOLATION);
             }
 
             sessionManager.register(deviceCode, connection);
 
         } catch (Exception e) {
-            System.out.println("connection failed :: "+e.getMessage());
-            return session.close();
+            String message = e.getMessage() != null ? e.getMessage() : "";
+
+            if ("token expired".equalsIgnoreCase(message)) {
+                log.warn("❌ Token expired");
+
+                return session.close(CloseStatus.POLICY_VIOLATION);
+            }
+
+            log.error("❌ WS AUTH FAILED: {}", message, e);
+
+            return session.close(CloseStatus.NOT_ACCEPTABLE);
         }
 
         return session.receive()

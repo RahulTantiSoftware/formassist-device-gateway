@@ -9,6 +9,8 @@ import org.springframework.web.reactive.socket.*;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Slf4j
 public record DeviceWebSocketHandler(
         DeviceSessionManager sessionManager,
@@ -18,15 +20,15 @@ public record DeviceWebSocketHandler(
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         System.out.println("🔥 HANDLER HIT");
-        String protocol = session.getHandshakeInfo()
+        List<String> protocols = session.getHandshakeInfo()
                 .getHeaders()
-                .getFirst("Sec-WebSocket-Protocol");
+                .get("Sec-WebSocket-Protocol");
 
-        if (protocol == null || !protocol.startsWith("Bearer ")) {
+        if (protocols == null || protocols.isEmpty()) {
             return session.close();
         }
 
-        String token = protocol.substring(7);
+        String token = protocols.getFirst();
 
         System.out.println("connection started .............");
         if (token.isEmpty()) {

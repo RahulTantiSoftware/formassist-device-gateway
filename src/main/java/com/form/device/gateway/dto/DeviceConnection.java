@@ -1,6 +1,5 @@
 package com.form.device.gateway.dto;
 
-import lombok.Setter;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.reactive.socket.WebSocketSession;
 

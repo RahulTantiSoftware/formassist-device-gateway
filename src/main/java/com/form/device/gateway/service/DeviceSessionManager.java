@@ -3,9 +3,11 @@ package com.form.device.gateway.service;
 import com.form.device.gateway.dto.DeviceConnection;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
@@ -15,6 +17,11 @@ public class DeviceSessionManager {
     private final Map<String, DeviceConnection> connections = new ConcurrentHashMap<>();
 
     public void register(String deviceCode, DeviceConnection connection) {
+        DeviceConnection existing = connections.get(deviceCode);
+
+        if (existing != null) {
+            close(existing);
+        }
         connections.put(deviceCode, connection);
         connection.updateHeartbeat("active");
     }
@@ -26,8 +33,13 @@ public class DeviceSessionManager {
 
     private void close(DeviceConnection connection) {
         if (connection == null) return;
-        connection.session()
-                .close()
+
+        WebSocketSession session = connection.session();
+        if (session == null || !session.isOpen()) return;
+
+        session.close()
+                .doOnSuccess(v -> System.out.println("Session closed for device"))
+                .doOnError(e -> System.out.println(MessageFormat.format("Error closing session: {0}", e.getMessage())))
                 .onErrorResume(e -> Mono.empty())
                 .subscribe();
     }

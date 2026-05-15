@@ -16,6 +16,7 @@ public class DeviceSessionManager {
 
     public void register(String deviceCode, DeviceConnection connection) {
         connections.put(deviceCode, connection);
+        connection.updateHeartbeat("active");
     }
 
     public void remove(String deviceId) {

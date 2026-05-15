@@ -24,7 +24,7 @@ public class GatewayKafkaConsumer {
         try {
             KafkaMessage kafkaMessage = objectMapper.readValue(record.value(), KafkaMessage.class);
             String deviceCode = kafkaMessage.deviceCode();
-            String message    = record.value();
+            String message    = kafkaMessage.data();
             sessionManager.send(deviceCode, objectMapper.writeValueAsString(new DeviceMessage("print",message)));
         } catch (JsonProcessingException e) {
             logMessage(e);
@@ -40,7 +40,7 @@ public class GatewayKafkaConsumer {
         try {
             KafkaMessage kafkaMessage = objectMapper.readValue(record.value(), KafkaMessage.class);
             String deviceCode = kafkaMessage.deviceCode();
-            String message    = record.value();
+            String message    = kafkaMessage.data();
             sessionManager.send(deviceCode, objectMapper.writeValueAsString(new DeviceMessage("payment",message)));
         } catch (JsonProcessingException e) {
             logMessage(e);
@@ -52,7 +52,7 @@ public class GatewayKafkaConsumer {
         try {
             KafkaMessage kafkaMessage = objectMapper.readValue(record.value(), KafkaMessage.class);
             String deviceCode = kafkaMessage.deviceCode();
-            String message    = record.value();
+            String message    = kafkaMessage.data();
             sessionManager.send(deviceCode, objectMapper.writeValueAsString(new DeviceMessage("scan",message)));
         } catch (JsonProcessingException e) {
             logMessage(e);
@@ -64,7 +64,7 @@ public class GatewayKafkaConsumer {
         try {
             KafkaMessage kafkaMessage = objectMapper.readValue(record.value(), KafkaMessage.class);
             String deviceCode = kafkaMessage.deviceCode();
-            String message    = record.value();
+            String message    = kafkaMessage.data();
             sessionManager.send(deviceCode, objectMapper.writeValueAsString(new DeviceMessage("scanUpload",message)));
         } catch (JsonProcessingException e) {
             logMessage(e);

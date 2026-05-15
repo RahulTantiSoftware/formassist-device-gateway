@@ -25,7 +25,7 @@ public class DeviceSessionManager {
 
     private void close(DeviceConnection connection) {
         if (connection == null) return;
-        connection.getSession()
+        connection.session()
                 .close()
                 .onErrorResume(e -> Mono.empty())
                 .subscribe();
@@ -39,10 +39,9 @@ public class DeviceSessionManager {
     }
 
     private void checkConnections() {
-        long now = System.currentTimeMillis();
         connections.entrySet().removeIf(entry -> {
             DeviceConnection conn = entry.getValue();
-            if (now - conn.getLastHeartbeat() > 2 * 60 * 1000) {
+            if (!conn.isHeartbeatActive()) {
                 close(conn);
                 return true;
             }
@@ -52,8 +51,8 @@ public class DeviceSessionManager {
 
     public void send(String deviceCode, String message) {
         DeviceConnection connection = connections.get(deviceCode);
-        if (connection != null && connection.getSession().isOpen()) {
-            connection.getSession().send(Mono.just(connection.getSession().textMessage(message))).subscribe();
+        if (connection != null && connection.session().isOpen()) {
+            connection.session().send(Mono.just(connection.session().textMessage(message))).subscribe();
         }
     }
 }

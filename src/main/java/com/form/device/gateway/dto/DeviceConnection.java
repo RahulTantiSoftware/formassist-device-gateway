@@ -1,17 +1,23 @@
 package com.form.device.gateway.dto;
 
-import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.reactive.socket.WebSocketSession;
 
-@Setter
-@Getter
-public class DeviceConnection{
-     private final WebSocketSession session;
-     private long lastHeartbeat;
+import java.time.Duration;
 
-    public DeviceConnection(WebSocketSession session) {
-        this.session = session;
-        lastHeartbeat = System.currentTimeMillis();
+public record DeviceConnection(
+        WebSocketSession session,
+        String deviceCode,
+        StringRedisTemplate stringRedisTemplate
+) {
+
+    public void updateHeartbeat(String status) {
+        stringRedisTemplate.opsForValue().set("lastHeartbeat:" + deviceCode, status, Duration.ofSeconds(120));
+    }
+
+    public boolean isHeartbeatActive() {
+        String status = stringRedisTemplate.opsForValue().get("lastHeartbeat:" + deviceCode);
+        return status != null && status.equalsIgnoreCase("active");
     }
 }

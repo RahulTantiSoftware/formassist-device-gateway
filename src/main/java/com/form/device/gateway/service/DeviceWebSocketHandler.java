@@ -4,9 +4,7 @@ import com.form.device.gateway.security.AuthTokenValidator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.socket.*;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -30,14 +28,14 @@ public record DeviceWebSocketHandler(
 
         String token = protocols.getFirst();
 
-        System.out.println("connection started .............");
         if (token.isEmpty()) {
             System.out.println("token param is null");
             return session.close();
         }
 
 
-        DeviceConnection connection = new DeviceConnection(session);
+        DeviceConnection connection;
+        DeviceConnection tryConnection=null;
         String deviceCode;
         try {
             JWTClaimsSet claims       = validator.validate(token);
@@ -45,7 +43,7 @@ public record DeviceWebSocketHandler(
             int tokenVersionFromToken = claims.getIntegerClaim("tokenVersion");
             deviceCode                = claims.getStringClaim("key");
             String redisValue         = redis.opsForValue().get("token_version:" + userId);
-
+            connection                = tryConnection = new DeviceConnection(session,deviceCode,redis);
             if (redisValue == null || deviceCode==null) {
                 System.out.println("device code can't be null");
                 return session.close();
@@ -58,7 +56,6 @@ public record DeviceWebSocketHandler(
             }
 
             sessionManager.register(deviceCode, connection);
-
         } catch (Exception e) {
             String message = e.getMessage() != null ? e.getMessage() : "";
 
@@ -69,15 +66,16 @@ public record DeviceWebSocketHandler(
             }
 
             log.error("❌ WS AUTH FAILED: {}", message, e);
-
+            if(tryConnection!=null) tryConnection.updateHeartbeat("closed");
             return session.close(CloseStatus.NOT_ACCEPTABLE);
         }
 
         return session.receive()
                 .doOnNext(msg -> {
-                    connection.setLastHeartbeat(System.currentTimeMillis());
+                    connection.updateHeartbeat("active");
                 })
                 .doFinally(signal -> sessionManager.remove(deviceCode))
                 .then();
+
     }
 }

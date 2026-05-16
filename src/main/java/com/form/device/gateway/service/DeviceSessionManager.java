@@ -38,7 +38,7 @@ public class DeviceSessionManager {
         if (session == null || !session.isOpen()) return;
 
         session.close()
-                .doOnSuccess(v -> System.out.println("Session closed for device"))
+                .doOnSuccess(v ->{connection.stopHeartbeat();System.out.println("Session closed for device");})
                 .doOnError(e -> System.out.println(MessageFormat.format("Error closing session: {0}", e.getMessage())))
                 .onErrorResume(e -> Mono.empty())
                 .subscribe();

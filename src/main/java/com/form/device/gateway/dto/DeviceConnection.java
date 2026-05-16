@@ -19,4 +19,8 @@ public record DeviceConnection(
         String status = stringRedisTemplate.opsForValue().get("lastHeartbeat:" + deviceCode);
         return status != null && status.equalsIgnoreCase("active");
     }
+
+    public void stopHeartbeat() {
+        stringRedisTemplate.delete("lastHeartbeat:" + deviceCode);
+    }
 }

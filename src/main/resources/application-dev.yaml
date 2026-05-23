@@ -2,15 +2,7 @@ server:
   port: 8098
 spring:
   kafka:
-    bootstrap-servers: pkc-l7pr2.ap-south-1.aws.confluent.cloud:9092
-
-    properties:
-      security.protocol: SASL_SSL
-      sasl.mechanism: PLAIN
-      sasl.jaas.config: >
-        org.apache.kafka.common.security.plain.PlainLoginModule required
-        username='RY7CYQFI5Q3KD5LV'
-        password='cfltb2p5E5BhvOSfwnwe1ul2kVqaQC9DwMhTqtRhRbpNLmKZmEwhtaX73ALYyhkA';
+    bootstrap-servers: 192.168.31.217:9092
   data:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}

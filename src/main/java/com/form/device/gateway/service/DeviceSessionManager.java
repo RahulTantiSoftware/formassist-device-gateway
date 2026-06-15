@@ -23,7 +23,7 @@ public class DeviceSessionManager {
             close(existing);
         }
         connections.put(deviceCode, connection);
-        connection.updateHeartbeat("active");
+        connection.updateHeartbeat();
     }
 
     public void remove(String deviceId) {

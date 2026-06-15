@@ -6,18 +6,19 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 import java.time.Duration;
 
 public record DeviceConnection(
+        Long userId,
         WebSocketSession session,
         String deviceCode,
         StringRedisTemplate stringRedisTemplate
 ) {
 
-    public void updateHeartbeat(String status) {
-        stringRedisTemplate.opsForValue().set("lastHeartbeat:" + deviceCode, status, Duration.ofSeconds(120));
+    public void updateHeartbeat() {
+        stringRedisTemplate.opsForValue().set("lastHeartbeat:" + deviceCode, userId+"", Duration.ofSeconds(120));
     }
 
     public boolean isHeartbeatActive() {
         String status = stringRedisTemplate.opsForValue().get("lastHeartbeat:" + deviceCode);
-        return status != null && status.equalsIgnoreCase("active");
+        return status != null;
     }
 
     public void stopHeartbeat() {

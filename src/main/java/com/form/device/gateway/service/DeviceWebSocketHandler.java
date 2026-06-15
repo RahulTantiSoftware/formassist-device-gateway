@@ -43,7 +43,7 @@ public record DeviceWebSocketHandler(
             int tokenVersionFromToken = claims.getIntegerClaim("tokenVersion");
             deviceCode                = claims.getStringClaim("key");
             String redisValue         = redis.opsForValue().get("token_version:" + userId);
-            connection                = tryConnection = new DeviceConnection(session,deviceCode,redis);
+            connection                = tryConnection = new DeviceConnection(userId,session,deviceCode,redis);
             if (redisValue == null || deviceCode==null) {
                 System.out.println("device code can't be null");
                 return session.close();
@@ -66,13 +66,13 @@ public record DeviceWebSocketHandler(
             }
 
             log.error("❌ WS AUTH FAILED: {}", message, e);
-            if(tryConnection!=null) tryConnection.updateHeartbeat("closed");
+            if(tryConnection!=null) tryConnection.stopHeartbeat();
             return session.close(CloseStatus.NOT_ACCEPTABLE);
         }
 
         return session.receive()
                 .doOnNext(msg -> {
-                    connection.updateHeartbeat("active");
+                    connection.updateHeartbeat();
                 })
                 .doFinally(signal -> sessionManager.remove(deviceCode))
                 .then();
